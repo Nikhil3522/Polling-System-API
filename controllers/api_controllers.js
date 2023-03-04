@@ -124,36 +124,29 @@ module.exports.addVote = function(req, res){
 
 }
 
-module.exports.showQues = function(req, res){
+module.exports.showQues = async function(req, res){
     const quesId = req.params.id;
     var optionsArr;
-    
-    optionsSchema.find( { questionId: quesId } , (err, result) => {
-        if(err){
+    let title;
+
+    try {
+        const result = await QuestionSchema.findOne({ qid: quesId });
+        title = result.question;
+
+        const optionResult = await optionsSchema.find({ questionId: quesId });
+        optionsArr = optionResult;
+    } catch (error) {
+        if(error){
             return res.status(401).json({
-                message: "Something went wrong, Please check your question Id.",
+                message : "Somthing went wrong! Please check your question ID"
             })
         }
-        optionsArr = result;
+    }
 
-        QuestionSchema.findOne({ qid: quesId }, (err, result) => {
-            if(err){
-                return res.status(401).json({
-                    message: "Something went wrong, Please check your question Id.",
-                })
-            }
-
-            return res.status(201).json({
-                id: quesId ,
-                title: result.question,
-                option: optionsArr
-            })
-
-        })
-    }).catch(err => {
-        if(err){
-            console.log("Erre", err)
-        }
+    return res.status(201).json({
+        id: quesId ,
+        title: title,
+        option: optionsArr
     })
 }
 
