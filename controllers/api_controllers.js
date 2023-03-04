@@ -74,54 +74,35 @@ module.exports.optionDelete = function(req, res){
     })
 }
 
-module.exports.addVote = function(req, res){
+module.exports.addVote = async function(req, res){
     const OptId = req.params.id;
+    var totalVote = 0;
 
-    optionsSchema.findOne({optionId: OptId}, (err, result) => {
-        // if(err){
-        //     console.log("fsa");
-        //     return res.status(401).json({
-        //         message: `Something Worng, Please check your option Id `,
-        //     })
-        // }else if (!result) {
-        //     console.log("Not result")
-        //     return res.status(401).json({
-        //         message: `Error 2 in finding the option. Please check your option Id once.`,
-        //     })
-        // }
+    try {
+        const result = await optionsSchema.findOne( { optionId: OptId });
+        totalVote = result.votes + 1;
 
-        var totalVote = 0;
+        await optionsSchema.findOneAndUpdate(
+            { optionId: OptId },
+            { $set: { votes : totalVote}},
+            {
+                new: true, // Return the updated document
+                runValidators: true // Validate the new document against the model's schema
+            }
+        );
 
-        if(result){
-            totalVote = result.votes + 1;
-        
-            optionsSchema.findOneAndUpdate(
-                { optionId: OptId },
-                { $set: { votes : totalVote}},
-                {
-                    new: true, // Return the updated document
-                    runValidators: true // Validate the new document against the model's schema
-                }
-            )
-            .then(updatedDoc => {
-                return res.status(201).json({
-                    message: `Vote Submitted!`,
-                })
+        return res.status(201).json({
+            message: `Vote Submitted!`,
+        })
+
+    } catch (error) {
+        if(error){
+            return res.status(401).json({
+                message: "Error in voting!",
             })
-            .catch(err => {
-                return res.status(401).json({
-                    message: "Error in voting!",
-                })
-            });
         }
         
-    })
-    // .catch(err => {
-    //     return res.status(401).json({
-    //         message: `Error in finding the option. Please check your option Id once.`,
-    //     })
-    // });
-
+    }
 }
 
 module.exports.showQues = async function(req, res){
