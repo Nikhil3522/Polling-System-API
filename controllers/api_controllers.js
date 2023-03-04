@@ -3,23 +3,20 @@ const optionsSchema = require('../models/options');
 
 
 module.exports.questionCreated = async function(req, res){
-    // console.log("ques create controller", req.body);
-    var totalData = await QuestionSchema.count();
+    var totalData = await QuestionSchema.find().sort({qid: -1}).limit(1);
     QuestionSchema.create({
         question: req.body.question,
-        qid: totalData + 1,
+        qid: totalData[0].qid + 1,
     }, function(err, newQues){
         if(err){
-            console.log("Error in creating a question!");
             return res.status(401).json({
                 message: "Error in creating the question!",
             })
         }
 
-        console.log("Question created!", newQues);
         return res.status(200).json({
             message: "Question created!",
-            QuestionId: totalData + 1,
+            QuestionId: totalData[0].qid + 1,
         })
     })
 }
@@ -41,12 +38,12 @@ module.exports.questionDeleted = function(req, res){
 }
 
 module.exports.optionCreate = async function(req, res){
-    var totalData = await optionsSchema.count();
+    var totalData = await optionsSchema.find().sort({optionId: -1}).limit(1);
     const QuesId = req.params.id;
     optionsSchema.create({
         questionId: QuesId,
         options: req.body.option,
-        optionId: totalData+1,
+        optionId: totalData[0].optionId +1,
         link_to_vote: "Link"
     }, function(err, newOpt){
         if(err){
@@ -57,7 +54,7 @@ module.exports.optionCreate = async function(req, res){
 
         return res.status(200).json({
             message: "Option created!",
-            OptionId: totalData + 1,
+            OptionId: totalData[0].optionId + 1,
         })
     })
 }
