@@ -14,8 +14,5 @@ const questionSchema = new mongoose.Schema({
     timestamps: true
 });
 
-console.log("schemaaa created!")
-
 const QuestionSchema = mongoose.model('questionSchema', questionSchema);
-console.log("schema created!")
 module.exports = QuestionSchema;
